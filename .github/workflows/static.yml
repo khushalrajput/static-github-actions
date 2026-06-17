@@ -41,3 +41,34 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+      # ----------------------------------------------------------
+      # NOTIFY GOOGLE CHAT — SUCCESS
+      # "if: success()" is a built-in GitHub condition.
+      # This step ONLY runs if every previous step passed.
+      # We use curl (a command line tool) to send an HTTP POST
+      # request to your Google Chat webhook with a JSON payload.
+      # ----------------------------------------------------------
+      - name: Notify Google Chat on Success
+        if: success()
+        run: |
+          curl -X POST '${{ secrets.GOOGLE_CHAT_WEBHOOK }}' \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "text": "✅ *Deployment Successful!* \n Your site is live on GitHub Pages. 🚀"
+          }'
+
+      # ----------------------------------------------------------
+      # NOTIFY GOOGLE CHAT — FAILURE
+      # "if: failure()" is the opposite — this ONLY runs if
+      # any previous step failed. The deploy step failing won't
+      # stop THIS step from running because of this condition.
+      # ----------------------------------------------------------
+      - name: Notify Google Chat on Failure
+        if: failure()
+        run: |
+          curl -X POST '${{ secrets.GOOGLE_CHAT_WEBHOOK }}' \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "text": "❌ *Deployment Failed!* \n Something went wrong. Check the Actions tab. 🔍"
+          }'
+
